@@ -28,6 +28,7 @@
             text-align: center;
         }
         .map-title h3 { margin: 0; color: #333; font-size: 18px; }
+        .map-title p { margin: 5px 0 0 0; color: #666; font-size: 12px; font-style: italic; }
 
         /* Dropdown Filter */
         .filter-control {
@@ -50,8 +51,8 @@
             color: #333;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            font-size: 14px;
-            max-width: 250px;
+            font-size: 13px;
+            max-width: 270px;
         }
         .legend h4 { margin: 0 0 8px 0; font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
         .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
@@ -80,9 +81,10 @@
 </head>
 <body>
 
-    <!-- Title -->
+    <!-- Title & Subtext -->
     <div class="map-title">
         <h3>Birthplaces of Philippine Summer Olympic Medalists (1928-2024)</h3>
+        <p>I became intrigued by the birthplaces of our Summer Olympic medalists.</p>
     </div>
 
     <!-- Dropdown Filter -->
@@ -140,7 +142,7 @@
 
         // Function to filter and plot data
         function updateMap(sportFilter) {
-            markers.clearLayers(); // Clear old points
+            markers.clearLayers(); 
             
             medalists.forEach(function(athlete) {
                 if (sportFilter === "All" || athlete.sport === sportFilter) {
@@ -167,10 +169,14 @@
         var legend = L.control({position: 'bottomright'});
         legend.onAdd = function (map) {
             var div = L.DomUtil.create('div', 'legend');
-            div.innerHTML += '<h4>Legend</h4>';
+            div.innerHTML += '<h4>Legend & Metadata</h4>';
             div.innerHTML += '<div class="legend-item"><span class="legend-cluster"></span> Clustered Medalists</div>';
             div.innerHTML += '<div class="legend-item"><span class="legend-marker"></span> Individual Medalist</div>';
-            div.innerHTML += '<div class="legend-source"><b>Data Source:</b> <a href="https://en.wikipedia.org/wiki/List_of_Olympic_medalists_for_the_Philippines" target="_blank">List of Olympic medalists for the Philippines (Wikipedia)</a></div>';
+            div.innerHTML += '<div class="legend-source">';
+            div.innerHTML += '<b>Data Source:</b> <a href="https://en.wikipedia.org/wiki/List_of_Olympic_medalists_for_the_Philippines" target="_blank">Wikipedia</a><br>';
+            div.innerHTML += '<b>Basemap:</b> OpenStreetMap contributors<br>';
+            div.innerHTML += '<b>GIS Tools:</b> Leaflet.js & Leaflet.MarkerCluster';
+            div.innerHTML += '</div>';
             return div;
         };
         legend.addTo(map);
