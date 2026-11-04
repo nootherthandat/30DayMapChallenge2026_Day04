@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Birthplaces of Philippine Summer Olympic Medalists</title>
+    <title>Birthplaces of Philippine Summer Olympic Medalists (1928-2024)</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
@@ -51,6 +51,7 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             font-size: 14px;
+            max-width: 250px;
         }
         .legend h4 { margin: 0 0 8px 0; font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
         .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
@@ -65,13 +66,23 @@
             display: inline-block; margin-right: 12px; margin-left: 4px;
             border: 1px solid #185a9d;
         }
+        .legend-source {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #ccc;
+            font-size: 11px;
+            color: #666;
+            line-height: 1.3;
+        }
+        .legend-source a { color: #2b82cb; text-decoration: none; }
+        .legend-source a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <!-- Title -->
     <div class="map-title">
-        <h3>Birthplaces of Philippine Summer Olympic Medalists</h3>
+        <h3>Birthplaces of Philippine Summer Olympic Medalists (1928-2024)</h3>
     </div>
 
     <!-- Dropdown Filter -->
@@ -112,7 +123,7 @@
             {name: "Carlos Yulo", sport: "Gymnastics", region: "National Capital Region (NCR)", lat: 14.6091, lng: 121.0223},
             {name: "Teófilo Yldefonso", sport: "Swimming", region: "I - Ilocos Region", lat: 17.2000, lng: 120.4667},
             {name: "Anthony Villanueva", sport: "Boxing", region: "IV-A - CALABARZON", lat: 14.1000, lng: 121.1333},
-            {name: "Miguel White", sport: "Athletics", region: "V - Bicol Region", lat: 13.4167, lng: 123.3667},
+            {name: "Miguel Solano White", sport: "Athletics", region: "V - Bicol Region", lat: 13.4167, lng: 123.3667},
             {name: "Roel Velasco", sport: "Boxing", region: "VI - Western Visayas", lat: 10.7333, lng: 122.5667},
             {name: "Onyok Velasco", sport: "Boxing", region: "VI - Western Visayas", lat: 10.7333, lng: 122.5667},
             {name: "Aira Villegas", sport: "Boxing", region: "VIII - Eastern Visayas", lat: 11.9167, lng: 125.0000},
@@ -159,6 +170,7 @@
             div.innerHTML += '<h4>Legend</h4>';
             div.innerHTML += '<div class="legend-item"><span class="legend-cluster"></span> Clustered Medalists</div>';
             div.innerHTML += '<div class="legend-item"><span class="legend-marker"></span> Individual Medalist</div>';
+            div.innerHTML += '<div class="legend-source"><b>Data Source:</b> <a href="https://en.wikipedia.org/wiki/List_of_Olympic_medalists_for_the_Philippines" target="_blank">List of Olympic medalists for the Philippines (Wikipedia)</a></div>';
             return div;
         };
         legend.addTo(map);
