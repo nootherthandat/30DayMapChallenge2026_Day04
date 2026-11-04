@@ -2,12 +2,10 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 
-# 1. Load and clean the data
 df = pd.read_csv("#30DayMapChallenge2026 (Day 04_ Clusters) - Birthplaces of Summer Olympics Medalists.csv")
 df['Region'] = df['Region'].ffill()
 df_valid = df.dropna(subset=['Name']).copy()
 
-# 2. Define Regional Centroids (Longitude, Latitude)
 coords = {
     "National Capital Region (NCR)": [121.0223, 14.6091], 
     "IX - Zamboanga Peninsula": [122.8637, 8.1541],
@@ -20,7 +18,6 @@ coords = {
     "XI - Davao Region": [125.5333, 7.1500]
 }
 
-# 3. Map coordinates and create geometry
 df_valid['Lon'] = df_valid['Region'].map(lambda x: coords.get(x, [None, None])[0])
 df_valid['Lat'] = df_valid['Region'].map(lambda x: coords.get(x, [None, None])[1])
 df_valid = df_valid.dropna(subset=['Lon', 'Lat'])
@@ -28,5 +25,4 @@ df_valid = df_valid.dropna(subset=['Lon', 'Lat'])
 geometry = [Point(xy) for xy in zip(df_valid['Lon'], df_valid['Lat'])]
 gdf = gpd.GeoDataFrame(df_valid, geometry=geometry, crs="EPSG:4326")
 
-# 4. Export to GeoJSON
 gdf.to_file("medalists.geojson", driver="GeoJSON")
