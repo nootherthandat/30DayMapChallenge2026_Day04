@@ -11,11 +11,83 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     
     <style>
-        body { padding: 0; margin: 0; }
+        body { padding: 0; margin: 0; font-family: Arial, sans-serif; }
         #map { height: 100vh; width: 100vw; }
+        
+        /* Map Title Overlay */
+        .map-title {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .map-title h3 { margin: 0; color: #333; font-size: 18px; }
+
+        /* Dropdown Filter */
+        .filter-control {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .filter-control select { padding: 5px; font-size: 14px; cursor: pointer; }
+
+        /* Legend */
+        .legend {
+            background: white;
+            padding: 12px;
+            line-height: 1.5em;
+            color: #333;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            font-size: 14px;
+        }
+        .legend h4 { margin: 0 0 8px 0; font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
+        .legend-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .legend-cluster {
+            width: 20px; height: 20px; background-color: rgba(110, 204, 57, 0.6); 
+            border: 2px solid rgba(110, 204, 57, 0.8); border-radius: 50%;
+            display: inline-block; margin-right: 8px;
+        }
+        .legend-marker {
+            width: 12px; height: 18px; background-color: #2b82cb;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            display: inline-block; margin-right: 12px; margin-left: 4px;
+            border: 1px solid #185a9d;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Title -->
+    <div class="map-title">
+        <h3>Birthplaces of Philippine Summer Olympic Medalists</h3>
+    </div>
+
+    <!-- Dropdown Filter -->
+    <div class="filter-control">
+        <label for="sportFilter"><strong>Sport: </strong></label>
+        <select id="sportFilter">
+            <option value="All">All Sports</option>
+            <option value="Athletics">Athletics</option>
+            <option value="Boxing">Boxing</option>
+            <option value="Gymnastics">Gymnastics</option>
+            <option value="Swimming">Swimming</option>
+            <option value="Weightlifting">Weightlifting</option>
+        </select>
+    </div>
+
+    <!-- Map Container -->
     <div id="map"></div>
 
     <!-- Leaflet & MarkerCluster JS -->
@@ -23,31 +95,74 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
     <script>
-        var map = L.map('map').setView([12.8797, 121.7740], 6);
+        // Initialize Map
+        var map = L.map('map', {zoomControl: false}).setView([12.8797, 121.7740], 6);
+        L.control.zoom({position: 'topleft'}).addTo(map);
 
+        // Standard OpenStreetMap Basemap
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        var markers = L.markerClusterGroup();
+        // Embedded Dataset with Regional Centroids
+        const medalists = [
+            {name: "José Villanueva", sport: "Boxing", region: "National Capital Region (NCR)", lat: 14.6091, lng: 121.0223},
+            {name: "Leopoldo Serantes", sport: "Boxing", region: "National Capital Region (NCR)", lat: 14.6091, lng: 121.0223},
+            {name: "Carlos Yulo", sport: "Gymnastics", region: "National Capital Region (NCR)", lat: 14.6091, lng: 121.0223},
+            {name: "Teófilo Yldefonso", sport: "Swimming", region: "I - Ilocos Region", lat: 17.2000, lng: 120.4667},
+            {name: "Anthony Villanueva", sport: "Boxing", region: "IV-A - CALABARZON", lat: 14.1000, lng: 121.1333},
+            {name: "Miguel White", sport: "Athletics", region: "V - Bicol Region", lat: 13.4167, lng: 123.3667},
+            {name: "Roel Velasco", sport: "Boxing", region: "VI - Western Visayas", lat: 10.7333, lng: 122.5667},
+            {name: "Onyok Velasco", sport: "Boxing", region: "VI - Western Visayas", lat: 10.7333, lng: 122.5667},
+            {name: "Aira Villegas", sport: "Boxing", region: "VIII - Eastern Visayas", lat: 11.9167, lng: 125.0000},
+            {name: "Simeon Toribio", sport: "Athletics", region: "IX - Zamboanga Peninsula", lat: 8.1541, lng: 122.8637},
+            {name: "Hidilyn Diaz", sport: "Weightlifting", region: "IX - Zamboanga Peninsula", lat: 8.1541, lng: 122.8637},
+            {name: "Eumir Marcial", sport: "Boxing", region: "IX - Zamboanga Peninsula", lat: 8.1541, lng: 122.8637},
+            {name: "Carlo Paalam", sport: "Boxing", region: "X - Northern Mindanao", lat: 8.1833, lng: 124.9000},
+            {name: "Nesthy Petecio", sport: "Boxing", region: "XI - Davao Region", lat: 7.1500, lng: 125.5333}
+        ];
 
-        fetch('medalists.geojson')
-            .then(response => response.json())
-            .then(data => {
-                var geoJsonLayer = L.geoJSON(data, {
-                    onEachFeature: function (feature, layer) {
-                        var popupContent = "<b>" + feature.properties.Name + "</b><br/>" +
-                                           "Sport: " + feature.properties.Sport + "<br/>" +
-                                           "Region: " + feature.properties.Region;
-                        layer.bindPopup(popupContent);
-                    }
-                });
-                
-                markers.addLayer(geoJsonLayer);
-                map.addLayer(markers);
-            })
-            .catch(error => console.error('Error loading GeoJSON:', error));
+        // Initialize Cluster Group
+        var markers = L.markerClusterGroup();
+        map.addLayer(markers);
+
+        // Function to filter and plot data
+        function updateMap(sportFilter) {
+            markers.clearLayers(); // Clear old points
+            
+            medalists.forEach(function(athlete) {
+                if (sportFilter === "All" || athlete.sport === sportFilter) {
+                    var marker = L.marker([athlete.lat, athlete.lng]);
+                    
+                    var popupText = "<b>" + athlete.name + "</b><br/>" +
+                                    "Sport: " + athlete.sport + "<br/>" +
+                                    "Region: " + athlete.region;
+                    marker.bindPopup(popupText);
+                    markers.addLayer(marker);
+                }
+            });
+        }
+
+        // Initial Load (All Sports)
+        updateMap("All");
+
+        // Event Listener for Dropdown
+        document.getElementById('sportFilter').addEventListener('change', function(e) {
+            updateMap(e.target.value);
+        });
+
+        // Add Legend Control to Map
+        var legend = L.control({position: 'bottomright'});
+        legend.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML += '<h4>Legend</h4>';
+            div.innerHTML += '<div class="legend-item"><span class="legend-cluster"></span> Clustered Medalists</div>';
+            div.innerHTML += '<div class="legend-item"><span class="legend-marker"></span> Individual Medalist</div>';
+            return div;
+        };
+        legend.addTo(map);
+
     </script>
 </body>
 </html>
